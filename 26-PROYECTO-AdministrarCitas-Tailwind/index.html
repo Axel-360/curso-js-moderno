@@ -7,7 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Administrador de Pacientes</title>
     <link rel="stylesheet" href="dist/output.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
 </head>
 
 <body class="bg-gray-100 h-screen">
@@ -16,81 +18,89 @@
         <span class="text-indigo-700">Veterinaria</span>
     </h1>
 
-    <div class="mt-12 md:flex container mx-auto ">
+    <div class="mt-12 md:flex container mx-auto">
         <div class="md:w-1/2 lg:w-2/5 mx-5">
             <h2 class="font-black text-3xl text-center">Seguimiento Pacientes</h2>
-
             <p class="text-lg mt-5 text-center mb-10">
                 Añade Pacientes y
-                <span class="text-indigo-600 font-bold">Administralos</span>
+                <span class="text-indigo-600 font-bold">Adminístralos</span>
             </p>
 
             <form id="formulario-cita" class="bg-white shadow-md rounded-lg py-10 px-5 mb-10">
                 <div class="mb-5">
-                    <label for="paciente" class="block text-gray-700 uppercase font-bold text-sm">
-                        Nombre Paciente:
-                    </label>
+                    <label for="paciente" class="block text-gray-700 uppercase font-bold text-sm">Nombre
+                        Paciente:</label>
                     <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="paciente"
-                        placeholder="Nombre Paciente" name="paciente" aria-label="Nombre Paciente" />
+                        name="paciente" placeholder="Nombre Paciente" aria-label="Nombre Paciente">
                 </div>
 
                 <div class="mb-5">
-                    <label for="propietario" class="block text-gray-700 uppercase font-bold text-sm">
-                        Nombre Propietario:
-                    </label>
+                    <label for="propietario" class="block text-gray-700 uppercase font-bold text-sm">Nombre
+                        Propietario:</label>
                     <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="propietario"
-                        placeholder="Nombre Propietario" name="propietario" aria-label="Nombre Propietario" />
+                        name="propietario" placeholder="Nombre Propietario" aria-label="Nombre Propietario">
                 </div>
+
                 <div class="mb-5">
-                    <label for="email" class="block text-gray-700 uppercase font-bold text-sm">
-                        Email Contacto
-                    </label>
+                    <label for="email" class="block text-gray-700 uppercase font-bold text-sm">Email Contacto:</label>
                     <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="email" id="email"
-                        placeholder="E-mail Contacto" name="email" aria-label="Email Contacto" />
+                        name="email" placeholder="E-mail Contacto" aria-label="Email Contacto">
                 </div>
 
                 <div class="mb-5">
-                    <label for="fecha" class="block text-gray-700 uppercase font-bold text-sm">
-                        Fecha Alta
-                    </label>
+                    <label for="fecha" class="block text-gray-700 uppercase font-bold text-sm">Fecha Alta:</label>
                     <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="date" id="fecha"
-                        name="fecha" aria-label="Fecha Alta" />
+                        name="fecha" aria-label="Fecha Alta">
                 </div>
 
                 <div class="mb-5">
-                    <label for="sintomas" class="block text-gray-700 uppercase font-bold text-sm">
-                        Síntomas
-                    </label>
+                    <label for="sintomas" class="block text-gray-700 uppercase font-bold text-sm">Síntomas:</label>
                     <textarea class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" id="sintomas"
                         name="sintomas" placeholder="Síntomas del Paciente" aria-label="Síntomas"></textarea>
                 </div>
 
                 <input type="submit"
                     class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors"
-                    value='Registrar Paciente' aria-label="Registrar Paciente" />
+                    value="Registrar Paciente" aria-label="Registrar Paciente">
             </form>
         </div>
 
         <div class="md:w-1/2 lg:w-3/5 md:h-screen overflow-y-scroll">
             <h2 class="font-black text-3xl text-center">Listado Pacientes</h2>
-            <p class="text-xl mt-5 mb-10 text-center">
-                Administra tus
-                <span class="text-indigo-600 font-bold ">Pacientes y Citas</span>
-            </p>
+            <p class="text-xl mt-5 mb-10 text-center">Administra tus <span class="text-indigo-600 font-bold">Pacientes y
+                    Citas</span></p>
 
-            <!-- Barra de búsqueda -->
             <div class="mb-5">
-                <label for="buscar" class="block text-gray-700 uppercase font-bold text-sm">
-                    Buscar Paciente:
-                </label>
+                <label for="buscar" class="block text-gray-700 uppercase font-bold text-sm">Buscar Paciente:</label>
                 <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="buscar"
-                    placeholder="Buscar Paciente" name="buscar" aria-label="Buscar Paciente" />
+                    name="buscar" placeholder="Buscar Paciente" aria-label="Buscar Paciente">
             </div>
 
-            <div id="citas">
+            <div class="mb-5">
+                <button id="ordenar"
+                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Ordenar
+                    por Fecha</button>
+            </div>
+
+            <div class="mb-5">
+                <button id="exportar"
+                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Exportar
+                    Citas</button>
+                <input type="file" id="importar" class="mt-2 w-full p-3 border-2 border-gray-300">
+                <button id="confirmar-importacion"
+                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2 hidden">Confirmar
+                    Importación</button>
+            </div>
+
+            <div id="citas" class="p-5">
                 <p class="text-xl mt-5 mb-10 text-center">No Hay Pacientes</p>
             </div>
         </div>
+    </div>
+
+    <div class="mt-12 container mx-auto">
+        <h2 class="font-black text-3xl text-center">Calendario de Citas</h2>
+        <div id="calendar" class="mt-5"></div>
     </div>
 
     <script src="js/app.js"></script>
