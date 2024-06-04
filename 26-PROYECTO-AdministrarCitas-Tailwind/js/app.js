@@ -5,8 +5,10 @@ const emailInput = document.querySelector("#email");
 const fechaInput = document.querySelector("#fecha");
 const sintomasInput = document.querySelector("#sintomas");
 const buscarInput = document.querySelector("#buscar");
+const filtroPropietarioInput = document.querySelector("#filtro-propietario");
 const ordenarBtn = document.querySelector("#ordenar");
-const exportarBtn = document.querySelector("#exportar");
+const exportarCsvBtn = document.querySelector("#exportar-csv");
+const exportarPdfBtn = document.querySelector("#exportar-pdf");
 const importarInput = document.querySelector("#importar");
 const confirmarImportacionBtn = document.querySelector("#confirmar-importacion");
 
@@ -32,8 +34,10 @@ emailInput.addEventListener("change", datosCita);
 fechaInput.addEventListener("change", datosCita);
 sintomasInput.addEventListener("change", datosCita);
 buscarInput.addEventListener("input", buscarCita);
+filtroPropietarioInput.addEventListener("input", filtrarPorPropietario);
 ordenarBtn.addEventListener("click", ordenarCitasPorFecha);
-exportarBtn.addEventListener("click", exportarCitas);
+exportarCsvBtn.addEventListener("click", () => exportarCitas("csv"));
+exportarPdfBtn.addEventListener("click", () => exportarCitas("pdf"));
 importarInput.addEventListener("change", importarCitas);
 confirmarImportacionBtn.addEventListener("click", confirmarImportacion);
 
@@ -189,8 +193,8 @@ class AdminCitas {
         "eliminar"
       );
       btnEliminar.innerHTML =
-        'Eliminar <svg fill="none" class="h-5 w-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path class="rotate-on-hover" d="M21 12a9 9 0 11-18 0 9 9 0118 0z"></path><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0118 0z"></path></svg>';
-      btnEliminar.onclick = () => this.eliminar(cita.id);
+        'Eliminar <svg fill="none" class="h-5 w-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path class="rotate-on-hover" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path></svg>';
+      btnEliminar.onclick = () => mostrarModalConfirmacion(cita.id);
 
       const contenedorBotones = document.createElement("DIV");
       contenedorBotones.classList.add("flex", "justify-between", "mt-10");
@@ -342,27 +346,59 @@ function buscarCita(e) {
   citas.mostrar(citasFiltradas);
 }
 
+function filtrarPorPropietario(e) {
+  const termino = e.target.value.toLowerCase();
+  const citasFiltradas = citas.citas.filter((cita) => cita.propietario.toLowerCase().includes(termino));
+  citas.mostrar(citasFiltradas);
+}
+
 function ordenarCitasPorFecha() {
   citas.ordenarPorFecha(ordenAscendente);
   citas.mostrar();
   ordenAscendente = !ordenAscendente; // Cambiar el orden para la próxima vez
 }
 
-// Función para exportar citas a CSV
-function exportarCitas() {
+// Función para exportar citas a CSV y PDF
+function exportarCitas(formato) {
   const citas = JSON.parse(localStorage.getItem("citas")) || [];
-  let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Paciente,Propietario,Email,Fecha,Síntomas\n";
-  citas.forEach((cita) => {
-    const row = `${cita.paciente},${cita.propietario},${cita.email},${cita.fecha},${cita.sintomas}\n`;
-    csvContent += row;
-  });
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "citas.csv");
-  document.body.appendChild(link);
-  link.click();
+  if (formato === "csv") {
+    let csvContent = "data:text/csv;charset=utf-8,Paciente,Propietario,Email,Fecha,Síntomas\n";
+    citas.forEach((cita) => {
+      const row = `${cita.paciente},${cita.propietario},${cita.email},${formatearFecha(cita.fecha)},${cita.sintomas}\n`;
+      csvContent += row;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "citas.csv");
+    document.body.appendChild(link);
+    link.click();
+  } else if (formato === "pdf") {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let yPosition = 10; // Initial y position for the first text
+    const lineHeight = 10; // Space between lines
+
+    citas.forEach((cita) => {
+      doc.text(`Paciente: ${cita.paciente}`, 10, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Propietario: ${cita.propietario}`, 10, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Email: ${cita.email}`, 10, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Fecha: ${formatearFecha(cita.fecha)}`, 10, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Síntomas: ${cita.sintomas}`, 10, yPosition);
+      yPosition += lineHeight * 2; // Extra space between different citas
+
+      // Check if yPosition exceeds page height, if so, add a new page
+      if (yPosition > doc.internal.pageSize.height - lineHeight) {
+        doc.addPage();
+        yPosition = 10; // Reset y position for new page
+      }
+    });
+    doc.save("citas.pdf");
+  }
 }
 
 // Función para importar citas desde CSV
@@ -440,6 +476,42 @@ function confirmarImportacion() {
     texto: "Citas importadas correctamente",
     tipo: "success",
   });
+}
+
+// Mostrar modal de confirmación
+function mostrarModalConfirmacion(id) {
+  const modal = document.createElement("div");
+  modal.classList.add(
+    "modal-confirmacion",
+    "fixed",
+    "inset-0",
+    "flex",
+    "items-center",
+    "justify-center",
+    "bg-black",
+    "bg-opacity-50"
+  );
+  modal.innerHTML = `
+    <div class="bg-white p-5 rounded-lg shadow-lg text-center">
+      <p class="mb-5">¿Estás seguro de que quieres eliminar este paciente?</p>
+      <button id="confirmar-eliminar" class="bg-red-600 text-white p-2 rounded-full">Eliminar</button>
+      <button id="cancelar-eliminar" class="bg-blue-600 text-white p-2 rounded-full ml-3">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("confirmar-eliminar").onclick = () => {
+    citas.eliminar(id);
+    document.body.removeChild(modal);
+    new Notificacion({
+      texto: "Paciente eliminado correctamente",
+      tipo: "success",
+    });
+  };
+
+  document.getElementById("cancelar-eliminar").onclick = () => {
+    document.body.removeChild(modal);
+  };
 }
 
 // Inicializar el calendario

@@ -227,8 +227,13 @@ button,
 [type='button'],
 [type='reset'],
 [type='submit'] {
+  appearance: button;
   -webkit-appearance: button;
-  /* 1 */
+  /* Para navegadores basados en WebKit */
+  -moz-appearance: button;
+  /* Para navegadores basados en Mozilla */
+  -ms-appearance: button;
+  /* Para navegadores basados en Microsoft */
   background-color: transparent;
   /* 2 */
   background-image: none;
@@ -274,8 +279,13 @@ Correct the cursor style of increment and decrement buttons in Safari.
 */
 
 [type='search'] {
+  appearance: textfield;
   -webkit-appearance: textfield;
-  /* 1 */
+  /* Para navegadores basados en WebKit */
+  -moz-appearance: textfield;
+  /* Para navegadores basados en Mozilla */
+  -ms-appearance: textfield;
+  /* Para navegadores basados en Microsoft */
   outline-offset: -2px;
   /* 2 */
 }
@@ -415,8 +425,6 @@ embed,
 object {
   display: block;
   /* 1 */
-  vertical-align: middle;
-  /* 2 */
 }
 
 /*
@@ -911,4 +919,42 @@ video {
   .lg\:w-3\/5 {
     width: 60%;
   }
+}
+
+.modal-confirmacion {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.modal-confirmacion .bg-white {
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  max-width: 90%;
+  width: 100%;
+  max-width: 400px;
+}
+
+#confirmar-eliminar,
+#cancelar-eliminar {
+  border-radius: 1.5rem;
+  padding: 0.5rem 1rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+}
+
+#cancelar-eliminar {
+  background-color: #3b82f6;
+  /* Azul Tailwind */
+  transition: background-color 0.3s ease;
+}
+
+#cancelar-eliminar:hover {
+  background-color: #2563eb;
+  /* Azul oscuro Tailwind */
 }

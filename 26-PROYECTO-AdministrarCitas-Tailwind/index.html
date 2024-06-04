@@ -10,6 +10,7 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 
 <body class="bg-gray-100 h-screen">
@@ -77,15 +78,26 @@
             </div>
 
             <div class="mb-5">
+                <label for="filtro-propietario" class="block text-gray-700 uppercase font-bold text-sm">Filtrar por
+                    Propietario:</label>
+                <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text"
+                    id="filtro-propietario" name="filtro-propietario" placeholder="Filtrar por Propietario"
+                    aria-label="Filtrar por Propietario">
+            </div>
+
+            <div class="mb-5">
                 <button id="ordenar"
                     class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Ordenar
                     por Fecha</button>
             </div>
 
             <div class="mb-5">
-                <button id="exportar"
+                <button id="exportar-csv"
                     class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Exportar
-                    Citas</button>
+                    Citas CSV</button>
+                <button id="exportar-pdf"
+                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2">Exportar
+                    Citas PDF</button>
                 <input type="file" id="importar" class="mt-2 w-full p-3 border-2 border-gray-300">
                 <button id="confirmar-importacion"
                     class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2 hidden">Confirmar
