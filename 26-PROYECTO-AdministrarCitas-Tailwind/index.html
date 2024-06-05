@@ -9,113 +9,127 @@
     <link rel="stylesheet" href="dist/output.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js' defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js" defer></script>
 </head>
 
-<body class="bg-gray-100 h-screen">
-    <h1 class="font-black text-5xl text-center md:w-2/3 mx-auto mt-20">
-        Seguimiento Pacientes
-        <span class="text-indigo-700">Veterinaria</span>
-    </h1>
+<body class="bg-gray-100 min-h-screen">
+    <header>
+        <h1 class="font-black text-5xl text-center md:w-2/3 mx-auto mt-20">
+            Seguimiento Pacientes
+            <span class="text-indigo-700">Veterinaria</span>
+        </h1>
+        <button id="theme-toggle" class="absolute top-4 right-4 bg-indigo-600 text-white p-2 rounded-lg">
+            Cambiar Tema
+        </button>
+    </header>
 
-    <div class="mt-12 md:flex container mx-auto">
-        <div class="md:w-1/2 lg:w-2/5 mx-5">
-            <h2 class="font-black text-3xl text-center">Seguimiento Pacientes</h2>
-            <p class="text-lg mt-5 text-center mb-10">
-                Añade Pacientes y
-                <span class="text-indigo-600 font-bold">Adminístralos</span>
-            </p>
+    <main>
+        <section class="mt-12 md:flex container mx-auto">
+            <div class="card md:w-1/2 lg:w-2/5 mx-5">
+                <h2 class="font-black text-3xl text-center">Seguimiento Pacientes</h2>
+                <p class="text-lg mt-5 text-center mb-10">
+                    Añade Pacientes y
+                    <span class="text-indigo-600 font-bold">Adminístralos</span>
+                </p>
 
-            <form id="formulario-cita" class="bg-white shadow-md rounded-lg py-10 px-5 mb-10">
+                <form id="formulario-cita" class="bg-white shadow-md rounded-lg py-10 px-5 mb-10"
+                    aria-labelledby="form-title">
+                    <div class="mb-5">
+                        <label for="paciente" class="block text-gray-700 uppercase font-bold text-sm">Nombre
+                            Paciente:</label>
+                        <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text"
+                            id="paciente" name="paciente" placeholder="Ej: Max" aria-label="Nombre Paciente"
+                            title="Introduce el nombre del paciente">
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="propietario" class="block text-gray-700 uppercase font-bold text-sm">Nombre
+                            Propietario:</label>
+                        <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text"
+                            id="propietario" name="propietario" placeholder="Ej: Juan Pérez"
+                            aria-label="Nombre Propietario" title="Introduce el nombre del propietario">
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="email" class="block text-gray-700 uppercase font-bold text-sm">Email
+                            Contacto:</label>
+                        <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="email" id="email"
+                            name="email" placeholder="Ej: correo@example.com" aria-label="Email Contacto"
+                            title="Introduce un email de contacto válido">
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="fecha" class="block text-gray-700 uppercase font-bold text-sm">Fecha Alta:</label>
+                        <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="date" id="fecha"
+                            name="fecha" aria-label="Fecha Alta" title="Selecciona la fecha de alta">
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="sintomas" class="block text-gray-700 uppercase font-bold text-sm">Síntomas:</label>
+                        <textarea class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" id="sintomas"
+                            name="sintomas" placeholder="Describe los síntomas del paciente" aria-label="Síntomas"
+                            title="Describe los síntomas del paciente"></textarea>
+                    </div>
+
+                    <input type="submit"
+                        class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors"
+                        value="Registrar Paciente" aria-label="Registrar Paciente">
+                </form>
+            </div>
+
+            <div class="card md:w-1/2 lg:w-3/5 md:h-screen overflow-y-scroll">
+                <h2 class="font-black text-3xl text-center">Listado Pacientes</h2>
+                <p class="text-xl mt-5 mb-10 text-center">Administra tus <span
+                        class="text-indigo-600 font-bold">Pacientes y
+                        Citas</span></p>
+
                 <div class="mb-5">
-                    <label for="paciente" class="block text-gray-700 uppercase font-bold text-sm">Nombre
-                        Paciente:</label>
-                    <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="paciente"
-                        name="paciente" placeholder="Nombre Paciente" aria-label="Nombre Paciente">
+                    <label for="buscar" class="block text-gray-700 uppercase font-bold text-sm">Buscar Paciente:</label>
+                    <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="buscar"
+                        name="buscar" placeholder="Buscar Paciente" aria-label="Buscar Paciente">
                 </div>
 
                 <div class="mb-5">
-                    <label for="propietario" class="block text-gray-700 uppercase font-bold text-sm">Nombre
+                    <label for="filtro-propietario" class="block text-gray-700 uppercase font-bold text-sm">Filtrar por
                         Propietario:</label>
-                    <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="propietario"
-                        name="propietario" placeholder="Nombre Propietario" aria-label="Nombre Propietario">
+                    <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text"
+                        id="filtro-propietario" name="filtro-propietario" placeholder="Filtrar por Propietario"
+                        aria-label="Filtrar por Propietario">
                 </div>
 
                 <div class="mb-5">
-                    <label for="email" class="block text-gray-700 uppercase font-bold text-sm">Email Contacto:</label>
-                    <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="email" id="email"
-                        name="email" placeholder="E-mail Contacto" aria-label="Email Contacto">
+                    <button id="ordenar"
+                        class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Ordenar
+                        por Fecha</button>
                 </div>
 
                 <div class="mb-5">
-                    <label for="fecha" class="block text-gray-700 uppercase font-bold text-sm">Fecha Alta:</label>
-                    <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="date" id="fecha"
-                        name="fecha" aria-label="Fecha Alta">
+                    <button id="exportar-csv"
+                        class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Exportar
+                        Citas CSV</button>
+                    <button id="exportar-pdf"
+                        class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2">Exportar
+                        Citas PDF</button>
+                    <input type="file" id="importar" class="mt-2 w-full p-3 border-2 border-gray-300">
+                    <button id="confirmar-importacion"
+                        class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2 hidden">Confirmar
+                        Importación</button>
                 </div>
 
-                <div class="mb-5">
-                    <label for="sintomas" class="block text-gray-700 uppercase font-bold text-sm">Síntomas:</label>
-                    <textarea class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" id="sintomas"
-                        name="sintomas" placeholder="Síntomas del Paciente" aria-label="Síntomas"></textarea>
+                <div id="citas" class="p-5">
+                    <p class="text-xl mt-5 mb-10 text-center">No Hay Pacientes</p>
                 </div>
-
-                <input type="submit"
-                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors"
-                    value="Registrar Paciente" aria-label="Registrar Paciente">
-            </form>
-        </div>
-
-        <div class="md:w-1/2 lg:w-3/5 md:h-screen overflow-y-scroll">
-            <h2 class="font-black text-3xl text-center">Listado Pacientes</h2>
-            <p class="text-xl mt-5 mb-10 text-center">Administra tus <span class="text-indigo-600 font-bold">Pacientes y
-                    Citas</span></p>
-
-            <div class="mb-5">
-                <label for="buscar" class="block text-gray-700 uppercase font-bold text-sm">Buscar Paciente:</label>
-                <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text" id="buscar"
-                    name="buscar" placeholder="Buscar Paciente" aria-label="Buscar Paciente">
             </div>
+        </section>
 
-            <div class="mb-5">
-                <label for="filtro-propietario" class="block text-gray-700 uppercase font-bold text-sm">Filtrar por
-                    Propietario:</label>
-                <input class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md" type="text"
-                    id="filtro-propietario" name="filtro-propietario" placeholder="Filtrar por Propietario"
-                    aria-label="Filtrar por Propietario">
-            </div>
+        <section class="mt-12 container mx-auto">
+            <h2 class="font-black text-3xl text-center">Calendario de Citas</h2>
+            <div id="calendar" class="mt-5"></div>
+        </section>
+    </main>
 
-            <div class="mb-5">
-                <button id="ordenar"
-                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Ordenar
-                    por Fecha</button>
-            </div>
-
-            <div class="mb-5">
-                <button id="exportar-csv"
-                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">Exportar
-                    Citas CSV</button>
-                <button id="exportar-pdf"
-                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2">Exportar
-                    Citas PDF</button>
-                <input type="file" id="importar" class="mt-2 w-full p-3 border-2 border-gray-300">
-                <button id="confirmar-importacion"
-                    class="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors mt-2 hidden">Confirmar
-                    Importación</button>
-            </div>
-
-            <div id="citas" class="p-5">
-                <p class="text-xl mt-5 mb-10 text-center">No Hay Pacientes</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-12 container mx-auto">
-        <h2 class="font-black text-3xl text-center">Calendario de Citas</h2>
-        <div id="calendar" class="mt-5"></div>
-    </div>
-
-    <script src="js/app.js"></script>
+    <script src="js/app.js" defer></script>
 </body>
 
 </html>

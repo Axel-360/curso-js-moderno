@@ -1,64 +1,9 @@
-// Selectores
-const pacienteInput = document.querySelector("#paciente");
-const propietarioInput = document.querySelector("#propietario");
-const emailInput = document.querySelector("#email");
-const fechaInput = document.querySelector("#fecha");
-const sintomasInput = document.querySelector("#sintomas");
-const buscarInput = document.querySelector("#buscar");
-const filtroPropietarioInput = document.querySelector("#filtro-propietario");
-const ordenarBtn = document.querySelector("#ordenar");
-const exportarCsvBtn = document.querySelector("#exportar-csv");
-const exportarPdfBtn = document.querySelector("#exportar-pdf");
-const importarInput = document.querySelector("#importar");
-const confirmarImportacionBtn = document.querySelector("#confirmar-importacion");
-
-const formulario = document.querySelector("#formulario-cita");
-const formularioInput = document.querySelector('#formulario-cita input[type="submit"]');
-const contenedorCitas = document.querySelector("#citas");
-const calendarioEl = document.querySelector("#calendar");
-
-// Estado para el orden de las citas
-let ordenAscendente = true;
-let citasImportadas = [];
-
-// Eventos
-document.addEventListener("DOMContentLoaded", () => {
-  citas.cargarLocalStorage();
-  citas.mostrar();
-  inicializarCalendario();
-});
-
-pacienteInput.addEventListener("change", datosCita);
-propietarioInput.addEventListener("change", datosCita);
-emailInput.addEventListener("change", datosCita);
-fechaInput.addEventListener("change", datosCita);
-sintomasInput.addEventListener("change", datosCita);
-buscarInput.addEventListener("input", buscarCita);
-filtroPropietarioInput.addEventListener("input", filtrarPorPropietario);
-ordenarBtn.addEventListener("click", ordenarCitasPorFecha);
-exportarCsvBtn.addEventListener("click", () => exportarCitas("csv"));
-exportarPdfBtn.addEventListener("click", () => exportarCitas("pdf"));
-importarInput.addEventListener("change", importarCitas);
-confirmarImportacionBtn.addEventListener("click", confirmarImportacion);
-
-formulario.addEventListener("submit", submitCita);
-
-let editando = false;
-
-// Objeto de cita
-const citaObj = {
-  id: generarId(),
-  paciente: "",
-  propietario: "",
-  email: "",
-  fecha: "",
-  sintomas: "",
-};
-
+// Clases y Funciones
 class Notificacion {
-  constructor({ texto, tipo }) {
+  constructor({ texto, tipo, duracion = 5000 }) {
     this.texto = texto;
     this.tipo = tipo;
+    this.duracion = duracion;
     this.mostrar();
   }
 
@@ -73,19 +18,28 @@ class Notificacion {
       "alert",
       "uppercase",
       "font-bold",
-      "text-sm"
+      "text-sm",
+      "rounded-lg",
+      "shadow-md",
+      "transition-transform",
+      "transform",
+      "scale-95"
     );
 
     const alertaPrevia = document.querySelector(".alert");
-    alertaPrevia?.remove();
+    if (alertaPrevia) alertaPrevia.remove();
 
     this.tipo === "error" ? alerta.classList.add("bg-red-500") : alerta.classList.add("bg-green-500");
     alerta.textContent = this.texto;
     formulario.parentElement.insertBefore(alerta, formulario);
 
     setTimeout(() => {
+      alerta.classList.add("scale-100");
+    }, 100);
+
+    setTimeout(() => {
       alerta.remove();
-    }, 3000);
+    }, this.duracion);
   }
 }
 
@@ -94,33 +48,32 @@ class AdminCitas {
     this.citas = [];
   }
 
-  agregar(cita) {
+  async agregar(cita) {
     this.citas.push(cita);
-    this.guardarLocalStorage();
+    await this.guardarLocalStorage();
     this.mostrar();
   }
 
-  editar(citaActualizada) {
+  async editar(citaActualizada) {
     this.citas = this.citas.map((cita) => (cita.id === citaActualizada.id ? citaActualizada : cita));
-    this.guardarLocalStorage();
+    await this.guardarLocalStorage();
     this.mostrar();
   }
 
-  eliminar(id) {
+  async eliminar(id) {
     this.citas = this.citas.filter((cita) => cita.id !== id);
-    this.guardarLocalStorage();
+    await this.guardarLocalStorage();
     this.mostrar();
   }
 
-  ordenarPorFecha(ascendente) {
-    if (ascendente) {
-      this.citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-    } else {
-      this.citas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    }
+  async ordenarPorFecha(ascendente) {
+    this.citas.sort((a, b) =>
+      ascendente ? new Date(a.fecha) - new Date(b.fecha) : new Date(b.fecha) - new Date(a.fecha)
+    );
+    this.mostrar();
   }
 
-  mostrar(citas = this.citas) {
+  async mostrar(citas = this.citas) {
     // Limpiar el HTML
     while (contenedorCitas.firstChild) {
       contenedorCitas.removeChild(contenedorCitas.firstChild);
@@ -132,30 +85,30 @@ class AdminCitas {
       return;
     }
 
+    const fragment = document.createDocumentFragment();
+
     // Generando las citas
     citas.forEach((cita) => {
       const divCita = document.createElement("div");
       divCita.classList.add("mx-5", "my-10", "bg-white", "shadow-md", "px-5", "py-10", "rounded-xl", "p-3");
 
-      const paciente = document.createElement("p");
-      paciente.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-      paciente.innerHTML = `<span class="font-bold uppercase">Paciente: </span> ${cita.paciente}`;
-
-      const propietario = document.createElement("p");
-      propietario.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-      propietario.innerHTML = `<span class="font-bold uppercase">Propietario: </span> ${cita.propietario}`;
-
-      const email = document.createElement("p");
-      email.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-      email.innerHTML = `<span class="font-bold uppercase">E-mail: </span> ${cita.email}`;
-
-      const fecha = document.createElement("p");
-      fecha.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-      fecha.innerHTML = `<span class="font-bold uppercase">Fecha: </span> ${formatearFecha(cita.fecha)}`;
-
-      const sintomas = document.createElement("p");
-      sintomas.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-      sintomas.innerHTML = `<span class="font-bold uppercase">Síntomas: </span> ${cita.sintomas}`;
+      divCita.innerHTML = `
+                <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Paciente: </span>${
+                  cita.paciente
+                }</p>
+                <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Propietario: </span>${
+                  cita.propietario
+                }</p>
+                <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">E-mail: </span>${
+                  cita.email
+                }</p>
+                <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Fecha: </span>${formatearFecha(
+                  cita.fecha
+                )}</p>
+                <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Síntomas: </span>${
+                  cita.sintomas
+                }</p>
+            `;
 
       const btnEditar = document.createElement("button");
       btnEditar.classList.add(
@@ -172,10 +125,8 @@ class AdminCitas {
         "gap-2",
         "btn-editar"
       );
-      btnEditar.innerHTML =
-        'Editar <svg fill="none" class="h-5 w-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>';
-      const clone = structuredClone(cita);
-      btnEditar.onclick = () => cargarEdicion(clone);
+      btnEditar.innerHTML = `Editar <svg fill="none" class="h-5 w-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
+      btnEditar.onclick = () => cargarEdicion(cita);
 
       const btnEliminar = document.createElement("button");
       btnEliminar.classList.add(
@@ -192,8 +143,7 @@ class AdminCitas {
         "gap-2",
         "eliminar"
       );
-      btnEliminar.innerHTML =
-        'Eliminar <svg fill="none" class="h-5 w-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path class="rotate-on-hover" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path></svg>';
+      btnEliminar.innerHTML = `Eliminar <svg fill="none" class="h-5 w-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path class="rotate-on-hover" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path></svg>`;
       btnEliminar.onclick = () => mostrarModalConfirmacion(cita.id);
 
       const contenedorBotones = document.createElement("DIV");
@@ -202,89 +152,167 @@ class AdminCitas {
       contenedorBotones.appendChild(btnEditar);
       contenedorBotones.appendChild(btnEliminar);
 
-      divCita.appendChild(paciente);
-      divCita.appendChild(propietario);
-      divCita.appendChild(email);
-      divCita.appendChild(fecha);
-      divCita.appendChild(sintomas);
       divCita.appendChild(contenedorBotones);
-      contenedorCitas.appendChild(divCita);
+      fragment.appendChild(divCita);
     });
 
+    contenedorCitas.appendChild(fragment);
     // Actualizar el calendario
-    actualizarCalendario();
+    await actualizarCalendario();
   }
 
-  guardarLocalStorage() {
-    localStorage.setItem("citas", JSON.stringify(this.citas));
+  async guardarLocalStorage() {
+    return new Promise((resolve) => {
+      localStorage.setItem("citas", JSON.stringify(this.citas));
+      resolve();
+    });
   }
 
-  cargarLocalStorage() {
-    this.citas = JSON.parse(localStorage.getItem("citas")) || [];
+  async cargarLocalStorage() {
+    return new Promise((resolve) => {
+      this.citas = JSON.parse(localStorage.getItem("citas")) || [];
+      resolve();
+    });
   }
 }
 
+// Selectores
+const pacienteInput = document.querySelector("#paciente");
+const propietarioInput = document.querySelector("#propietario");
+const emailInput = document.querySelector("#email");
+const fechaInput = document.querySelector("#fecha");
+const sintomasInput = document.querySelector("#sintomas");
+const buscarInput = document.querySelector("#buscar");
+const filtroPropietarioInput = document.querySelector("#filtro-propietario");
+const ordenarBtn = document.querySelector("#ordenar");
+const exportarCsvBtn = document.querySelector("#exportar-csv");
+const exportarPdfBtn = document.querySelector("#exportar-pdf");
+const importarInput = document.querySelector("#importar");
+const confirmarImportacionBtn = document.querySelector("#confirmar-importacion");
+const formulario = document.querySelector("#formulario-cita");
+const formularioInput = document.querySelector('#formulario-cita input[type="submit"]');
+const contenedorCitas = document.querySelector("#citas");
+const calendarioEl = document.querySelector("#calendar");
+
+// Estado para el orden de las citas
+let ordenAscendente = true;
+let citasImportadas = [];
+
+// Crear instancia de AdminCitas
+const citas = new AdminCitas();
+
+// Eventos
+document.addEventListener("DOMContentLoaded", () => {
+  citas.cargarLocalStorage();
+  citas.mostrar();
+  inicializarCalendario();
+  // Validaciones en tiempo real
+  validarCampoEnTiempoReal(pacienteInput, "El nombre del paciente es obligatorio");
+  validarCampoEnTiempoReal(propietarioInput, "El nombre del propietario es obligatorio");
+  validarCampoEnTiempoReal(emailInput, "El email no es válido. Por favor, ingresa un email válido");
+  validarCampoEnTiempoReal(fechaInput, "La fecha es obligatoria y debe ser una fecha válida en el futuro.");
+  validarCampoEnTiempoReal(
+    sintomasInput,
+    "Los síntomas son obligatorios. Por favor, describe los síntomas del paciente."
+  );
+});
+
+pacienteInput.addEventListener("change", datosCita);
+propietarioInput.addEventListener("change", datosCita);
+emailInput.addEventListener("change", datosCita);
+fechaInput.addEventListener("change", datosCita);
+sintomasInput.addEventListener("change", datosCita);
+buscarInput.addEventListener("input", buscarYFiltrarCita);
+filtroPropietarioInput.addEventListener("input", buscarYFiltrarCita);
+ordenarBtn.addEventListener("click", ordenarCitasPorFecha);
+exportarCsvBtn.addEventListener("click", () => exportarCitas("csv"));
+exportarPdfBtn.addEventListener("click", () => exportarCitas("pdf"));
+importarInput.addEventListener("change", importarCitas);
+confirmarImportacionBtn.addEventListener("click", confirmarImportacion);
+formulario.addEventListener("submit", submitCita);
+
+let editando = false;
+
+// Objeto de cita
+const citaObj = {
+  id: generarId(),
+  paciente: "",
+  propietario: "",
+  email: "",
+  fecha: "",
+  sintomas: "",
+};
+
+// Funciones de validación en tiempo real
+function validarCampoEnTiempoReal(input, mensajeError) {
+  input.addEventListener("input", () => {
+    if (!input.value.trim()) {
+      mostrarError(input, mensajeError);
+    } else {
+      eliminarError(input);
+    }
+  });
+}
+
+function mostrarError(input, mensaje) {
+  const error = document.createElement("p");
+  error.textContent = mensaje;
+  error.classList.add("error", "text-red-500", "mt-2");
+  input.parentElement.appendChild(error);
+}
+
+function eliminarError(input) {
+  const error = input.parentElement.querySelector(".error");
+  if (error) {
+    error.remove();
+  }
+}
+
+// Funciones de búsqueda y filtrado
+function buscarYFiltrarCita() {
+  const terminoPaciente = buscarInput.value.toLowerCase();
+  const terminoPropietario = filtroPropietarioInput.value.toLowerCase();
+  const citasFiltradas = citas.citas.filter(
+    (cita) =>
+      cita.paciente.toLowerCase().includes(terminoPaciente) &&
+      cita.propietario.toLowerCase().includes(terminoPropietario)
+  );
+  citas.mostrar(citasFiltradas);
+}
+
+// Otras funciones necesarias
 function datosCita(e) {
   citaObj[e.target.name] = e.target.value;
 }
 
-const citas = new AdminCitas();
-
 function submitCita(e) {
   e.preventDefault();
+  const { paciente, propietario, email, fecha, sintomas } = citaObj;
 
-  if (!pacienteInput.value.trim()) {
-    new Notificacion({
-      texto: "El nombre del paciente es obligatorio",
-      tipo: "error",
-    });
+  if (!validarCampo(paciente, "El nombre del paciente es obligatorio", pacienteInput)) return;
+  if (!validarCampo(propietario, "El nombre del propietario es obligatorio", propietarioInput)) return;
+  if (!validarEmail(email)) {
+    new Notificacion({ texto: "El email no es válido. Por favor, ingresa un email válido.", tipo: "error" });
+    emailInput.focus();
     return;
   }
-
-  if (!propietarioInput.value.trim()) {
-    new Notificacion({
-      texto: "El nombre del propietario es obligatorio",
-      tipo: "error",
-    });
+  if (!validarFechaCampo(fecha, "La fecha es obligatoria y debe ser una fecha válida en el futuro.", fechaInput))
     return;
-  }
-
-  if (!validarEmail(emailInput.value)) {
-    new Notificacion({
-      texto: "El email no es válido",
-      tipo: "error",
-    });
+  if (
+    !validarCampo(
+      sintomas,
+      "Los síntomas son obligatorios. Por favor, describe los síntomas del paciente.",
+      sintomasInput
+    )
+  )
     return;
-  }
-
-  if (!fechaInput.value.trim() || !validarFecha(fechaInput.value)) {
-    new Notificacion({
-      texto: "La fecha es obligatoria y debe ser una fecha válida",
-      tipo: "error",
-    });
-    return;
-  }
-
-  if (!sintomasInput.value.trim()) {
-    new Notificacion({
-      texto: "Los síntomas son obligatorios",
-      tipo: "error",
-    });
-    return;
-  }
 
   if (editando) {
     citas.editar({ ...citaObj });
-    new Notificacion({
-      texto: "Guardado correctamente",
-      tipo: "success",
-    });
+    new Notificacion({ texto: "Guardado correctamente", tipo: "success" });
   } else {
     citas.agregar({ ...citaObj });
-    new Notificacion({
-      texto: "Paciente registrado correctamente",
-      tipo: "success",
-    });
+    new Notificacion({ texto: "Paciente registrado correctamente", tipo: "success" });
   }
 
   formulario.reset();
@@ -293,15 +321,31 @@ function submitCita(e) {
   editando = false;
 }
 
+function validarCampo(campo, mensaje, input) {
+  if (!campo.trim()) {
+    new Notificacion({ texto: mensaje, tipo: "error" });
+    input.focus();
+    return false;
+  }
+  return true;
+}
+
+function validarFechaCampo(fecha, mensaje, input) {
+  if (!fecha.trim() || !validarFecha(fecha)) {
+    new Notificacion({ texto: mensaje, tipo: "error" });
+    input.focus();
+    return false;
+  }
+  return true;
+}
+
 function reiniciarObjetoCita() {
-  Object.assign(citaObj, {
-    id: generarId(),
-    paciente: "",
-    propietario: "",
-    email: "",
-    fecha: "",
-    sintomas: "",
-  });
+  citaObj.id = generarId();
+  citaObj.paciente = "";
+  citaObj.propietario = "";
+  citaObj.email = "";
+  citaObj.fecha = "";
+  citaObj.sintomas = "";
 }
 
 function generarId() {
@@ -309,7 +353,12 @@ function generarId() {
 }
 
 function cargarEdicion(cita) {
-  Object.assign(citaObj, cita);
+  citaObj.id = cita.id;
+  citaObj.paciente = cita.paciente;
+  citaObj.propietario = cita.propietario;
+  citaObj.email = cita.email;
+  citaObj.fecha = cita.fecha;
+  citaObj.sintomas = cita.sintomas;
 
   pacienteInput.value = cita.paciente;
   propietarioInput.value = cita.propietario;
@@ -338,27 +387,12 @@ function validarFecha(fecha) {
   return fechaCita >= fechaActual;
 }
 
-function buscarCita(e) {
-  const termino = e.target.value.toLowerCase();
-  const citasFiltradas = citas.citas.filter(
-    (cita) => cita.paciente.toLowerCase().includes(termino) || cita.propietario.toLowerCase().includes(termino)
-  );
-  citas.mostrar(citasFiltradas);
-}
-
-function filtrarPorPropietario(e) {
-  const termino = e.target.value.toLowerCase();
-  const citasFiltradas = citas.citas.filter((cita) => cita.propietario.toLowerCase().includes(termino));
-  citas.mostrar(citasFiltradas);
-}
-
 function ordenarCitasPorFecha() {
   citas.ordenarPorFecha(ordenAscendente);
   citas.mostrar();
   ordenAscendente = !ordenAscendente; // Cambiar el orden para la próxima vez
 }
 
-// Función para exportar citas a CSV y PDF
 function exportarCitas(formato) {
   const citas = JSON.parse(localStorage.getItem("citas")) || [];
   if (formato === "csv") {
@@ -401,7 +435,6 @@ function exportarCitas(formato) {
   }
 }
 
-// Función para importar citas desde CSV
 function importarCitas(event) {
   const file = event.target.files[0];
   if (file) {
@@ -422,51 +455,46 @@ function importarCitas(event) {
   }
 }
 
-// Mostrar vista previa de citas importadas
 function mostrarVistaPreviaCitas() {
   // Limpiar el HTML de citas
   while (contenedorCitas.firstChild) {
     contenedorCitas.removeChild(contenedorCitas.firstChild);
   }
 
+  const fragment = document.createDocumentFragment();
+
   // Mostrar citas importadas
   citasImportadas.forEach((cita) => {
     const divCita = document.createElement("div");
     divCita.classList.add("mx-5", "my-10", "bg-white", "shadow-md", "px-5", "py-10", "rounded-xl", "p-3");
 
-    const paciente = document.createElement("p");
-    paciente.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-    paciente.innerHTML = `<span class="font-bold uppercase">Paciente: </span> ${cita.paciente}`;
+    divCita.innerHTML = `
+            <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Paciente: </span>${
+              cita.paciente
+            }</p>
+            <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Propietario: </span>${
+              cita.propietario
+            }</p>
+            <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">E-mail: </span>${
+              cita.email
+            }</p>
+            <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Fecha: </span>${formatearFecha(
+              cita.fecha
+            )}</p>
+            <p class="font-normal mb-3 text-gray-700 normal-case"><span class="font-bold uppercase">Síntomas: </span>${
+              cita.sintomas
+            }</p>
+        `;
 
-    const propietario = document.createElement("p");
-    propietario.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-    propietario.innerHTML = `<span class="font-bold uppercase">Propietario: </span> ${cita.propietario}`;
-
-    const email = document.createElement("p");
-    email.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-    email.innerHTML = `<span class="font-bold uppercase">E-mail: </span> ${cita.email}`;
-
-    const fecha = document.createElement("p");
-    fecha.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-    fecha.innerHTML = `<span class="font-bold uppercase">Fecha: </span> ${formatearFecha(cita.fecha)}`;
-
-    const sintomas = document.createElement("p");
-    sintomas.classList.add("font-normal", "mb-3", "text-gray-700", "normal-case");
-    sintomas.innerHTML = `<span class="font-bold uppercase">Síntomas: </span> ${cita.sintomas}`;
-
-    divCita.appendChild(paciente);
-    divCita.appendChild(propietario);
-    divCita.appendChild(email);
-    divCita.appendChild(fecha);
-    divCita.appendChild(sintomas);
-    contenedorCitas.appendChild(divCita);
+    fragment.appendChild(divCita);
   });
+
+  contenedorCitas.appendChild(fragment);
 
   // Mostrar botón de confirmación de importación
   confirmarImportacionBtn.classList.remove("hidden");
 }
 
-// Confirmar importación de citas
 function confirmarImportacion() {
   citasImportadas.forEach((cita) => citas.agregar(cita));
   citas.mostrar();
@@ -478,7 +506,6 @@ function confirmarImportacion() {
   });
 }
 
-// Mostrar modal de confirmación
 function mostrarModalConfirmacion(id) {
   const modal = document.createElement("div");
   modal.classList.add(
@@ -492,12 +519,12 @@ function mostrarModalConfirmacion(id) {
     "bg-opacity-50"
   );
   modal.innerHTML = `
-    <div class="bg-white p-5 rounded-lg shadow-lg text-center">
-      <p class="mb-5">¿Estás seguro de que quieres eliminar este paciente?</p>
-      <button id="confirmar-eliminar" class="bg-red-600 text-white p-2 rounded-full">Eliminar</button>
-      <button id="cancelar-eliminar" class="bg-blue-600 text-white p-2 rounded-full ml-3">Cancelar</button>
-    </div>
-  `;
+        <div class="bg-white p-5 rounded-lg shadow-lg text-center">
+            <p class="mb-5">¿Estás seguro de que quieres eliminar este paciente?</p>
+            <button id="confirmar-eliminar" class="bg-red-600 text-white p-2 rounded-full">Eliminar</button>
+            <button id="cancelar-eliminar" class="bg-blue-600 text-white p-2 rounded-full ml-3">Cancelar</button>
+        </div>
+    `;
   document.body.appendChild(modal);
 
   document.getElementById("confirmar-eliminar").onclick = () => {
@@ -514,7 +541,6 @@ function mostrarModalConfirmacion(id) {
   };
 }
 
-// Inicializar el calendario
 function inicializarCalendario() {
   const calendar = new FullCalendar.Calendar(calendarioEl, {
     initialView: "dayGridMonth",
@@ -527,7 +553,6 @@ function inicializarCalendario() {
   calendar.render();
 }
 
-// Actualizar el calendario con las citas actuales
 function actualizarCalendario() {
   const calendar = new FullCalendar.Calendar(calendarioEl, {
     initialView: "dayGridMonth",
@@ -539,3 +564,19 @@ function actualizarCalendario() {
   });
   calendar.render();
 }
+
+// Funcionalidad para cambiar entre temas claro y oscuro
+document.addEventListener("DOMContentLoaded", () => {
+  const themeToggleBtn = document.getElementById("theme-toggle");
+  themeToggleBtn.addEventListener("click", toggleTheme);
+
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+  }
+
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+});

@@ -1,3 +1,153 @@
+/* Estilos para tema claro */
+:root {
+  --bg-color: #F3F4F6;
+  /* color de fondo claro */
+  --text-color: #000000;
+  /* color de texto claro */
+  --primary-color: #4f46e5;
+  /* Indigo 600 */
+  --secondary-color: #2563eb;
+  /* Azul 600 */
+  --input-bg-color: #ffffff;
+  /* color de fondo de input claro */
+  --input-border-color: #d1d5db;
+  /* color de borde de input claro */
+  --button-text-color: #ffffff;
+  /* color de texto de botón claro */
+  --placeholder-color: #6b7280;
+  /* color de placeholder claro */
+  --card-bg-color: #ffffff;
+  /* color de fondo de tarjetas en modo claro */
+  --section-bg-color: #F3F4F6;
+  /* color de fondo de secciones en modo claro */
+}
+
+/* Estilos para tema oscuro */
+[data-theme="dark"] {
+  --bg-color: #1a202c;
+  /* color de fondo oscuro */
+  --text-color: #e2e8f0;
+  /* color de texto oscuro */
+  --primary-color: #4f46e5;
+  /* Indigo 600 */
+  --secondary-color: #2563eb;
+  /* Azul 600 */
+  --input-bg-color: #2d3748;
+  /* color de fondo de input oscuro */
+  --input-border-color: #4a5568;
+  /* color de borde de input oscuro */
+  --button-text-color: #ffffff;
+  /* color de texto de botón oscuro */
+  --placeholder-color: #a0aec0;
+  /* color de placeholder oscuro */
+  --card-bg-color: #2d3748;
+  /* color de fondo de tarjetas en modo oscuro */
+  --section-bg-color: #1a202c;
+  /* color de fondo de secciones en modo oscuro */
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Asegurar que los elementos principales utilicen los colores de las variables */
+header,
+main,
+section,
+footer,
+div,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span {
+  color: var(--text-color);
+}
+
+/* Asegurar que el fondo de las secciones sea consistente */
+header,
+main,
+section,
+footer {
+  background-color: var(--section-bg-color);
+}
+
+/* Estilo específico para formularios y botones */
+input,
+textarea,
+button {
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--input-border-color);
+}
+
+/* Mejorar la visibilidad de los botones */
+button {
+  background-color: var(--primary-color);
+  color: var(--button-text-color);
+  padding: 1rem 1.5rem;
+  /* Aumentar el padding para mayor visibilidad */
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  /* Agregar transiciones para mejor feedback visual */
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
+  /* Aumentar ligeramente el tamaño al pasar el mouse */
+}
+
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--placeholder-color);
+}
+
+/* Estilos específicos para las tarjetas */
+.card {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  /* Asegurarse de que el texto en las tarjetas sea legible */
+}
+
+/* Estilos específicos para el calendario */
+.fc .fc-toolbar-title {
+  color: var(--text-color);
+}
+
+.fc .fc-button {
+  background-color: var(--primary-color);
+  color: var(--button-text-color);
+  border: none;
+}
+
+.fc .fc-button:hover {
+  background-color: var(--secondary-color);
+}
+
+.fc .fc-daygrid-event {
+  background-color: var(--primary-color);
+  border: none;
+  color: var(--button-text-color);
+}
+
+/*
+! tailwindcss v3.3.3 | MIT License | https://tailwindcss.com
+*/
+
 /*
 ! tailwindcss v3.3.3 | MIT License | https://tailwindcss.com
 */
